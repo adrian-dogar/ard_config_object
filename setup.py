@@ -8,5 +8,5 @@ setup(
     author_email='adrian.dogar@gmail.com',
     description='Manage configuration objects with secrets',
     packages=find_packages(),
-    install_requires=['python-dotenv', 'json'],
+    install_requires=['python-dotenv'],
 )
