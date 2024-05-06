@@ -6,5 +6,10 @@
   "some_other_secret_info": {
     "$ref": "some_other_secret",
     "required": false
+  },
+  "parent": {
+    "child": {
+      "$ref": "child"
+    }
   }
 }

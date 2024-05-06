@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ard-config-object',
-    version='0.2.0',
+    version='0.2.1',
     url='https://github.com/adi-do/ard_config_object',
     author='Adrian Ruben Dogar',
     author_email='adrian.dogar@gmail.com',

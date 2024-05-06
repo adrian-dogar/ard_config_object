@@ -9,7 +9,7 @@ class Config:
         self.errors = []
         self.object = object
         self.original = self.load_original()
-        self.completed = self.load_completed()
+        self.completed = self.load_completed(self.original)
         # self.load_config_as_attributes()
 
     def to_string(self):
@@ -26,24 +26,17 @@ class Config:
             raise FileNotFoundError(f"File {self.object} not found")
         return settings
 
-    def load_completed(self):
-        completed = {}
-        for key, value in self.original.items():
-            value = self.add_secrets(value)
-            completed[key] = value
-        return completed
-
     def load_config_as_attributes(self):
         for key, value in self.original.items():
-            value = self.add_secrets(value)
+            value = self.load_completed(value)
             setattr(self, key, value)
 
-    def add_secrets(self, node):
+    def load_completed(self, node):
         if isinstance(node, dict) and "$ref" in node:
             node = self.replace_secret(node)
         elif isinstance(node, dict):
-            for item in node.items():
-                self.add_secrets(item)
+            for key, value in node.items():
+                node[key] = self.load_completed(value)
         return node
 
     def replace_secret(self, node):
