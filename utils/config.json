@@ -1,0 +1,6 @@
+{
+  "some_info": "This is a test file for the test branch",
+  "some_secret_info": {
+    "$ref": "some_secret"
+  }
+}
