@@ -1,7 +1,7 @@
 import json
 import unittest
 from unittest.mock import patch, mock_open
-from config import Config
+from configobj.config import Config
 
 
 class ConfigTest(unittest.TestCase):

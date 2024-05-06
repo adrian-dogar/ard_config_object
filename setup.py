@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ard_config_object',
-    version='0.1.0',
+    name='ard-config-object',
+    version='0.1.1',
     url='https://github.com/adi-do/ard_config_object',
     author='Adrian Ruben Dogar',
     author_email='adrian.dogar@gmail.com',
