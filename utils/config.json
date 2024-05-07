@@ -11,5 +11,10 @@
     "child": {
       "$ref": "child"
     }
-  }
+  },
+  "list": [
+    {
+      "$ref": "child"
+    }
+  ]
 }

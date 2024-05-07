@@ -55,6 +55,12 @@ class ConfigTest(unittest.TestCase):
         config = Config("config.json")
         self.assertEqual(config.to_json(), '{\n  "errors": [],\n  "object": "config.json",\n  "original": {\n    "key": "value"\n  },\n  "completed": {\n    "key": "value"\n  }\n}')
 
+    @patch('builtins.open', new_callable=mock_open, read_data='{"list": [{"$ref": "SECRET"}]}')
+    @patch('os.getenv', return_value="secret_value")
+    def test_load_completed_with_list(self, mock_file, mock_getenv):
+        config = Config("config.json").items()
+        self.assertEqual(config['list'], ["secret_value"])
+
 
 if __name__ == '__main__':
     unittest.main()

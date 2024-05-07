@@ -37,6 +37,9 @@ class Config:
         elif isinstance(node, dict):
             for key, value in node.items():
                 node[key] = self.load_completed(value)
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                node[index] = self.load_completed(value)
         return node
 
     def replace_secret(self, node):
