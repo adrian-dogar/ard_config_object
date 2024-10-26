@@ -1,5 +1,6 @@
 {
   "some_info": "This is a test file for the test branch",
+  "element": "In-line ${placeholder} test",
   "some_secret_info": {
     "$ref": "some_secret"
   },
