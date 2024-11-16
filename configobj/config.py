@@ -3,36 +3,30 @@ import re
 import dotenv
 import json
 import logging
-import stat
 
 import yaml
 
 logger = logging.getLogger(__name__)
 
-def has_700_permissions(file_path):
-    file_stat = os.stat(file_path)
-    permissions = stat.S_IMODE(file_stat.st_mode)
-    return permissions == 0o700
-
 class Config:
-    # def __init__(self, object, env_file=".env"):
-    def __init__(self, object, env_file=None):
+    def __init__(self, data_file, env_file=None):
+        """
+
+        :param data_file: route and filename for a json or yaml file
+        :param env_file: optional. route and filename for a .env file to load the extra data
+        """
         if env_file:
             dotenv.load_dotenv(env_file)
-            # It's working, but it's breaking the tests
-            # if not has_700_permissions(os.path.abspath(env_file)):
-            #     logger.warning(f"Config file [{os.path.abspath(env_file)}] permissions are not set to 700")
         self.errors = []
-        self.object = object
-        self.original = self.load_original(object)
-        self.completed = self.load_completed(self.original)
-        # self.load_config_as_attributes()
+        self.data_filename = data_file
+        self.original_data = self.load_original()
+        self.completed_data = self.fill_in(self.original_data)
+        # self.load_config_as_attributes_of_current_class()
 
-        # It's working, but it's breaking the tests
-        # if not has_700_permissions(os.path.abspath(self.object)):
-        #     logger.warning(f"Config file [{os.path.abspath(self.object)}] permissions are not set to 700")
-
-
+    def load_config_as_attributes_of_current_class(self):
+        for key, value in self.original_data.items():
+            value = self.fill_in(value)
+            setattr(self, key, value)
 
     def to_string(self):
         return str(self.__dict__)
@@ -40,65 +34,89 @@ class Config:
     def to_json(self):
         return json.dumps(self.__dict__, indent=2)
 
-    def load_original(self, object):
+    def load_original(self):
         try:
-            with open(object, "r", encoding='UTF-8') as f:
-                # settings = json.load(f)
+            with open(self.data_filename, "r", encoding='UTF-8') as f:
                 binary = f.read()
         except FileNotFoundError:
-            raise FileNotFoundError(f"File {self.object} not found")
+            raise FileNotFoundError(f"File {self.data_filename} not found")
 
-        settings = {}
-        if object.endswith(".json"):
+        if self.data_filename.endswith(".json"):
             try:
                 settings = json.loads(binary)
             except json.JSONDecodeError:
-                raise json.JSONDecodeError(f"File {self.object} is not a valid JSON file", binary, 0)
+                raise json.JSONDecodeError(f"File {self.data_filename} is not a valid JSON file", binary, 0)
 
-        elif object.endswith(".yaml") or object.endswith(".yml"):
+        elif self.data_filename.endswith(".yaml") or self.data_filename.endswith(".yml"):
             try:
                 settings = yaml.safe_load(binary)
             except yaml.YAMLError:
-                raise yaml.YAMLError(f"File {self.object} is not a valid YAML file")
+                raise yaml.YAMLError(f"File {self.data_filename} is not a valid YAML file")
 
         else:
-            raise ValueError(f"File {self.object} has an unknown data format")
+            raise ValueError(f"File {self.data_filename} has an unknown data format")
         return settings
 
-    def load_config_as_attributes(self):
-        for key, value in self.original.items():
-            value = self.load_completed(value)
-            setattr(self, key, value)
-
-    def load_completed(self, node):
+    def fill_in(self, node):
         if isinstance(node, dict) and "$ref" in node:
-            node = self.replace_secret(node)
+            node = self._replace_node_style(node)
         elif isinstance(node, dict):
             for key, value in node.items():
-                node[key] = self.load_completed(value)
+                node[key] = self.fill_in(value)
         elif isinstance(node, list):
             for index, value in enumerate(node):
-                node[index] = self.load_completed(value)
-        elif isinstance(node, str) and re.search(r"\$\{[\w.]+\}", node):
-            node = self.replace_inline_secret(node)
+                node[index] = self.fill_in(value)
+        elif isinstance(node, str) and re.search(r"\$\{([\@\#\/\w\.\-]+)\}", node):
+            node = self._replace_inline_style(node)
         return node
 
-    def replace_inline_secret(self, node):
-        if type(node) is str:
-            matches = re.findall(r"\$\{([\w.]+)\}", node)
-            for match in matches:
-                if os.getenv(match) is not None:
-                    node = node.replace(f"${{{match}}}", os.getenv(match))
+    def _replace_inline_style(self, ref):
+        matches = re.findall(r"\$\{([\@\#\/\w\.\-]+)\}", ref)
+        for match in matches:
+            value = self._fetch_value(match)
+            ref = ref.replace(f"${{{match}}}", value)
 
-        return node
+        return ref
 
-    def replace_secret(self, node):
+    def _replace_node_style(self, node):
         if "required" in node and node["required"] is True and os.getenv(node["$ref"]) is None:
             error_message = f"Environment variable {node['$ref']} is required but missing in the .env file"
             self.errors.append(error_message)
             raise ValueError(error_message)
 
-        return os.getenv(node["$ref"])
+        return self._fetch_value(node["$ref"])
+
+    def _fetch_value(self, ref):
+        value = ''
+        if ref.startswith("@env."):
+            ref = ref.replace("@env.", "")
+            value = os.getenv(ref)
+
+        elif ref.startswith("#"):
+            ref = ref.replace("#", "")
+            # ref is now a path to a value in the original_data
+            value = self._fetch_nested_value(ref)
+
+        elif "#" in ref:
+            filepath, inner_route = ref.split("#")
+            sub_file = Config(filepath).items()
+            value = self._fetch_nested_value(inner_route, sub_file)
+
+        return value
+
+    def _fetch_nested_value(self, ref, file=None):
+        # remove the leading slash if any
+        if ref.startswith("/"):
+            ref = ref[1:]
+        keys = ref.split("/")
+        value = self.original_data if file is None else file
+        for key in keys:
+            value = value[key]
+        return value
 
     def items(self):
-        return self.completed
+        """
+        Return the dictionary with the data from the config file, with all the placeholders replaced with referenced values
+        :return: dict
+        """
+        return self.completed_data

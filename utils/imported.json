@@ -1,0 +1,6 @@
+{
+    "kind": "resource",
+    "spec": {
+      "some_property": "short_value"
+    }
+}

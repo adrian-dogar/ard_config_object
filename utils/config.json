@@ -1,21 +1,33 @@
 {
   "some_info": "This is a test file for the test branch",
-  "element": "In-line ${placeholder} test",
+  "element": "In-line ${@env.placeholder} test",
+  "definitions": {
+    "short_value": "short"
+  },
   "some_secret_info": {
-    "$ref": "some_secret"
+    "$ref": "@env.some_secret",
+    "required": true
   },
   "some_other_secret_info": {
-    "$ref": "some_other_secret",
+    "$ref": "@env.some_other_secret",
     "required": false
   },
   "parent": {
     "child": {
-      "$ref": "child"
-    }
+      "$ref": "@env.child"
+    },
+    "short_value": {"$ref": "#/definitions/short_value"},
+    "placeholder": "${@env.placeholder}",
+    "hardcoded": "test",
+    "referenced_property": {"$ref": "./imported.json#/spec/some_property"},
+    "env_ref": {"$ref": "@env.child"}
+
   },
   "list": [
-    {
-      "$ref": "child"
-    }
+    {"$ref": "#/definitions/short_value"},
+    "${@env.placeholder}",
+    "test",
+    {"$ref": "./imported.json#/spec/some_property"},
+    {"$ref": "@env.child"}
   ]
 }

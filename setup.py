@@ -1,19 +1,17 @@
 from setuptools import setup, find_packages
-import pathlib
 
-CWD = pathlib.Path(__file__).parent
-
-README = (CWD / "README.md").read_text()
+with open('README.md', 'r', encoding='utf-8') as f:
+    readme = f.read()
 
 setup(
-    name='ard-config-object',
-    version='0.2.2',
+    name='ard-config-data_filename',
+    version='0.3.0',
     url='https://github.com/adrian-dogar/ard_config_object',
     author='Adrian Ruben Dogar',
     author_email='adrian.dogar@gmail.com',
     description='Manage configuration objects with secrets',
-    long_description=README,
-    long_description_content_type='text/markdown',
+    long_description=readme,
+    long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=[
         "pyyaml",

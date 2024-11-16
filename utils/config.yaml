@@ -1,0 +1,26 @@
+definitions:
+  short_value: short
+element: In-line ${@env.placeholder} test
+list:
+- $ref: '#/definitions/short_value'
+- ${@env.placeholder}
+- test
+- $ref: ./imported.json#/spec/some_property
+- $ref: '@env.child'
+parent:
+  child:
+    $ref: '@env.child'
+  env_ref:
+    $ref: '@env.child'
+  hardcoded: test
+  placeholder: ${@env.placeholder}
+  referenced_property:
+    $ref: ./imported.json#/spec/some_property
+  short_value:
+    $ref: '#/definitions/short_value'
+some_info: This is a test file for the test branch
+some_other_secret_info:
+  $ref: '@env.some_other_secret'
+  required: false
+some_secret_info:
+  $ref: '@env.some_secret'
