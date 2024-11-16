@@ -15,13 +15,12 @@ def has_700_permissions(file_path):
     return permissions == 0o700
 
 class Config:
-    # def __init__(self, object, env_file=".env"):
     def __init__(self, object, env_file=None):
         if env_file:
             dotenv.load_dotenv(env_file)
             # It's working, but it's breaking the tests
-            # if not has_700_permissions(os.path.abspath(env_file)):
-            #     logger.warning(f"Config file [{os.path.abspath(env_file)}] permissions are not set to 700")
+            if not has_700_permissions(os.path.abspath(env_file)):
+                logger.warning(f"Config file [{os.path.abspath(env_file)}] permissions are not set to 700")
         self.errors = []
         self.object = object
         self.original = self.load_original(object)
@@ -29,8 +28,8 @@ class Config:
         # self.load_config_as_attributes()
 
         # It's working, but it's breaking the tests
-        # if not has_700_permissions(os.path.abspath(self.object)):
-        #     logger.warning(f"Config file [{os.path.abspath(self.object)}] permissions are not set to 700")
+        if not has_700_permissions(os.path.abspath(self.object)):
+            logger.warning(f"Config file [{os.path.abspath(self.object)}] permissions are not set to 700")
 
 
 
