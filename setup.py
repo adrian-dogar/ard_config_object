@@ -4,7 +4,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
     readme = f.read()
 
 setup(
-    name='ard-config-data_filename',
+    name='ard-config-object',
     version='0.3.0',
     url='https://github.com/adrian-dogar/ard_config_object',
     author='Adrian Ruben Dogar',
