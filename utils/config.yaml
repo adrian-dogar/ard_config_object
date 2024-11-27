@@ -5,7 +5,7 @@ list:
 - $ref: '#/definitions/short_value'
 - ${@env.placeholder}
 - test
-- $ref: ./imported.json#/spec/some_property
+- $ref: subdir/imported.json#/spec/some_property
 - $ref: '@env.child'
 parent:
   child:
@@ -15,7 +15,7 @@ parent:
   hardcoded: test
   placeholder: ${@env.placeholder}
   referenced_property:
-    $ref: ./imported.json#/spec/some_property
+    $ref: subdir/${@env.filename}#/spec/some_property
   short_value:
     $ref: '#/definitions/short_value'
 some_info: This is a test file for the test branch

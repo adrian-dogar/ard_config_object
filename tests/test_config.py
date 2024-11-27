@@ -55,7 +55,7 @@ bad pair
     @patch('builtins.open', new_callable=mock_open, read_data='{"key": {"$ref": "@env.SECRET_KEY"}}')
     @patch('os.getenv', return_value="secret_value")
     def test_add_secrets_with_ref_from_env_var_json(self, mock_getenv, mock_file):
-        config = Config("config.json").items()
+        config = Config("config.json", env_file=".env").items()
         self.assertEqual(config['key'], "secret_value")
 
     @patch('builtins.open', new_callable=mock_open, read_data="""key:
@@ -184,6 +184,28 @@ bad pair
         config = Config("config.json").items()
         self.assertEqual(config['list'], ["magic"])
 
+    # @patch('builtins.open')
+    # @patch('json.loads')
+    # @patch('os.getenv', filename="another_file.json")
+    # def test_load_completed_with_inline_placeholder_inside_a_node_reference_for_value_from_different_file(self, mock_getenv, mock_json_loads, mock_open):
+    #     # Create separate mock data for each file
+    #     config_data = {"list": [{"$ref": "./${@env.filename}#dark/secret"}]}
+    #     another_data = {"dark": {"secret": "dark_value"}}
+    #
+    #     # Set up mock_json_loads to return our mock data
+    #     mock_json_loads.side_effect = [config_data, another_data]
+    #
+    #     # Set up mock_open to return a MagicMock
+    #     mock_file = mock_open()
+    #     mock_file.return_value.__enter__.return_value.read.return_value = "mock_file_content"
+    #     mock_open.return_value = mock_file
+    #
+    #     # Execute the test
+    #     config = Config("config.json").items()
+    #     self.assertEqual(config['list'], ["dark_value"])
+    #
+    #     # Verify that json.loads was called twice
+    #     self.assertEqual(mock_json_loads.call_count, 2)
 
 if __name__ == '__main__':
     unittest.main()

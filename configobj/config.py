@@ -66,12 +66,12 @@ class Config:
         elif isinstance(node, list):
             for index, value in enumerate(node):
                 node[index] = self.fill_in(value)
-        elif isinstance(node, str) and re.search(r"\$\{([\@\#\/\w\.\-]+)\}", node):
+        elif isinstance(node, str) and re.search(r"\$\{([@#/\w.\-]+)}", node):
             node = self._replace_inline_style(node)
         return node
 
     def _replace_inline_style(self, ref):
-        matches = re.findall(r"\$\{([\@\#\/\w\.\-]+)\}", ref)
+        matches = re.findall(r"\$\{([@#/\w.\-]+)}", ref)
         for match in matches:
             value = self._fetch_value(match)
             ref = ref.replace(f"${{{match}}}", value)
@@ -79,6 +79,7 @@ class Config:
         return ref
 
     def _replace_node_style(self, node):
+        node['$ref'] = self.fill_in(node['$ref'])
         if "required" in node and node["required"] is True and os.getenv(node["$ref"]) is None:
             error_message = f"Environment variable {node['$ref']} is required but missing in the .env file"
             self.errors.append(error_message)

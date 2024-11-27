@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setup(
     name='ard-config-object',
-    version='0.3.0',
+    version='0.3.1',
     url='https://github.com/adrian-dogar/ard_config_object',
     author='Adrian Ruben Dogar',
     author_email='adrian.dogar@gmail.com',
