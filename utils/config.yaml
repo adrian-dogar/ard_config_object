@@ -24,3 +24,4 @@ some_other_secret_info:
   required: false
 some_secret_info:
   $ref: '@env.some_secret'
+key_with_${@env.placeholder}: value

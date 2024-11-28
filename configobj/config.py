@@ -58,15 +58,22 @@ class Config:
         return settings
 
     def fill_in(self, node):
+        pattern = r"\$\{([@#/\w.\-]+)}"
         if isinstance(node, dict) and "$ref" in node:
             node = self._replace_node_style(node)
         elif isinstance(node, dict):
+            keys_to_replace = {}
             for key, value in node.items():
+                if re.search(pattern, key):
+                    new_key = self._replace_inline_style(key)
+                    keys_to_replace[key] = new_key
                 node[key] = self.fill_in(value)
+            for old_key, new_key in keys_to_replace.items():
+                node[new_key] = node.pop(old_key)
         elif isinstance(node, list):
             for index, value in enumerate(node):
                 node[index] = self.fill_in(value)
-        elif isinstance(node, str) and re.search(r"\$\{([@#/\w.\-]+)}", node):
+        elif isinstance(node, str) and re.search(pattern, node):
             node = self._replace_inline_style(node)
         return node
 
