@@ -58,7 +58,7 @@ class Config:
         return settings
 
     def fill_in(self, node):
-        pattern = r"\$\{([@#/\w.\-]+)}"
+        pattern = r"\$\{([!@#/\w.\-]+)}"
         if isinstance(node, dict) and "$ref" in node:
             node = self._replace_node_style(node)
         elif isinstance(node, dict):
@@ -69,6 +69,8 @@ class Config:
                     keys_to_replace[key] = new_key
                 node[key] = self.fill_in(value)
             for old_key, new_key in keys_to_replace.items():
+                if new_key in node:
+                    raise ValueError(f"Key {new_key} already exists in the dictionary.")
                 node[new_key] = node.pop(old_key)
         elif isinstance(node, list):
             for index, value in enumerate(node):
@@ -78,7 +80,7 @@ class Config:
         return node
 
     def _replace_inline_style(self, ref):
-        matches = re.findall(r"\$\{([@#/\w.\-]+)}", ref)
+        matches = re.findall(r"\$\{([!@#/\w.\-]+)}", ref)
         for match in matches:
             value = self._fetch_value(match)
             ref = ref.replace(f"${{{match}}}", value)

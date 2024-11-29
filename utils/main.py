@@ -31,7 +31,9 @@ expected = {
   "some_info": "This is a test file for the test branch",
   "some_other_secret_info": None,
   "some_secret_info": "1234",
-  "key_with_variable": "value"
+  "short_secret": "short",
+  "key_with_variable": "value",
+  "short_size": "short_value"
 }
 
 assert config.items() == expected

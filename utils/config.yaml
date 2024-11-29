@@ -25,3 +25,6 @@ some_other_secret_info:
 some_secret_info:
   $ref: '@env.some_secret'
 key_with_${@env.placeholder}: value
+short_secret: "${#/definitions/short_value}"
+${#/definitions/short_value}_size: short_value
+#${#/definitions/short_value}_secret: short_value
